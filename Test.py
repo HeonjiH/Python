@@ -1,4 +1,6 @@
 import pandas as pd
+import json
+from flask import Flask, request
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from konlpy.tag import Okt
 
@@ -49,6 +51,7 @@ class MainClass:
         self.questionBleu = SentenceBleu()
         self.answerBleu = SentenceBleu()
         self.qnaDict = {}
+        self.correctAnswer = ""
     
     #qna data excel파일에서 읽어오기
     def importExcel(self, path, fileName):
@@ -69,6 +72,10 @@ class MainClass:
         self.questionBleu.setGenerate(sentence)
         return self.questionBleu.getPrecision()
     
+    def getCorrectAnswer(self, sentence):
+        result = self.question(sentence)
+        return self.qnaDict[result]
+    
     def answer(self, sentence):
         self.answerBleu.setGenerate(sentence)
         return self.answerBleu.getPrecision()
@@ -83,4 +90,31 @@ class MainClass:
         
 _main = MainClass(["공지", "문자 초안 작성"])
 _main.importExcel("C:/Users/dalsa/OneDrive/Desktop/study/Python", "test.xlsx")
-_main.inputSet()
+
+#restful api
+app = Flask(__name__)
+
+@app.route("/question", methods=["POST"])
+def getCorrectAnswer():
+    post_result = json.loads(request.get_data())
+    _question = post_result["question"]
+    answer = _main.getCorrectAnswer(_question)
+    
+    _genAnswer = post_result["answer"]
+    _result = _main.answer(_genAnswer)
+    
+    isTrue = False
+    if(answer == _result):
+        isTrue = True
+    
+    print("======================================")
+    print("======================================")
+    print(_result)    
+    print("======================================")
+    print(isTrue)
+    print("======================================")
+    print("======================================")
+    
+    return answer
+
+app.run(host="localhost", port=8080)
