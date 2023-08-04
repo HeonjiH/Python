@@ -41,6 +41,7 @@ class SentenceBleu:
                     tmpScore = score
                     tmpRef = " ".join(refStr[0])
         
+        print(tmpScore)
         return self.refDict[tmpRef]
         
 
@@ -110,7 +111,6 @@ def getCorrectAnswer():
     print("======================================")
     print("======================================")
     print(_result)    
-    print("======================================")
     print(isTrue)
     print("======================================")
     print("======================================")
